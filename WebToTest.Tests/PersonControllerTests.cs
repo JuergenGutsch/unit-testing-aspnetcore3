@@ -9,6 +9,7 @@ using WebToTest.Controllers;
 using WebToTest.Data.Entities;
 using WebToTest.Services;
 using Xunit;
+using WebToTest.Models;
 
 namespace WebToTest.Tests
 {
@@ -54,10 +55,10 @@ namespace WebToTest.Tests
             Assert.Equal(1, person.Id);
         }
 
-        private IEnumerable<Person> GetFakeData()
+        private IEnumerable<PersonModel> GetFakeData()
         {
             var i = 1;
-            var persons = A.ListOf<Person>(26);
+            var persons = A.ListOf<PersonModel>(26);
             persons.ForEach(x => x.Id = i++);
             return persons.Select(_ => _);
         }

@@ -1,27 +1,32 @@
-using System.Collections.Generic;
-using System.Linq;
-using GenFu;
-using Microsoft.EntityFrameworkCore;
-using Moq;
-using WebToTest.Data;
-using WebToTest.Data.Entities;
-using WebToTest.Services;
 using Xunit;
+using System.Linq;
+using WebToTest.Data.Entities;
+using GenFu;
+using Moq;
+using WebToTest.Services;
+using WebToTest.Controllers;
+using System.Collections.Generic;
+using WebToTest.Data;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using System;
 
-namespace WebToTest.Tests
+namespace WebToTest.IntegrationTests
 {
-    public class PersonServiceTests
+    public class PersonIntegrationTest
     {
         [Fact]
-        public void AllPersonsTest()
+        public void GetPersonsTest()
         {
             // arrange
-            var context = CreateDbContextMock();
+            var context = CreateDbContext();
 
             var service = new PersonService(context.Object);
 
+            var controller = new PersonController(service);
+
             // act
-            var results = service.AllPersons();
+            var results = controller.GetPersons();
 
             var count = results.Count();
 
@@ -29,7 +34,25 @@ namespace WebToTest.Tests
             Assert.Equal(26, count);
         }
 
-        private Mock<ApplicationDbContext> CreateDbContextMock()
+        [Fact]
+        public void GetPersonTest()
+        {
+            // arrange
+            var context = CreateDbContext();
+
+            var service = new PersonService(context.Object);
+
+            var controller = new PersonController(service);
+
+            // act
+            var result = controller.GetPerson(1);
+            var person = result.Value;
+
+            // assert
+            Assert.Equal(1, person.Id);
+        }
+
+        private Mock<ApplicationDbContext> CreateDbContext()
         {
             var persons = GetFakeData().AsQueryable();
 
@@ -41,23 +64,8 @@ namespace WebToTest.Tests
 
             var context = new Mock<ApplicationDbContext>();
             context.Setup(c => c.Persons).Returns(dbSet.Object);
+            
             return context;
-        }
-
-        [Fact]
-        public void FindPersonTest()
-        {
-            // arrange
-            var context = CreateDbContextMock();
-
-            var service = new PersonService(context.Object);
-
-            // act
-            var person = service.FindPerson(1);
-
-
-            // assert
-            Assert.Equal(1, person.Id);
         }
 
         private IEnumerable<Person> GetFakeData()
